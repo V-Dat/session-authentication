@@ -1,6 +1,7 @@
-const express = require('express');
-const session = require('express-session');
-const bodyParser = require('body-parser');
+import bodyParser from "body-parser";
+import express from "express";
+import session from "express-session";
+import users from "./db.js";
 
 const app = express();
 const PORT = 3000;
@@ -9,21 +10,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(
   session({
-    secret: 'your_secret_key', 
+    secret: "your_secret_key",
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 60000 },
   })
 );
 
-// Dummy users database
-const users = {
-  user1: 'password1',
-  user2: 'password2',
-};
-
 // Route for login
-app.post('/login', (req, res) => {
+app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   if (users[username] && users[username] === password) {
@@ -31,27 +26,29 @@ app.post('/login', (req, res) => {
     req.session.username = username;
     return res.send(`Welcome, ${username}! You are logged in.`);
   } else {
-    return res.status(401).send('Invalid credentials');
+    return res.status(401).send("Invalid credentials");
   }
 });
 
 // Route for protected content
-app.get('/dashboard', (req, res) => {
+app.get("/dashboard", (req, res) => {
   if (req.session.username) {
-    return res.send(`Hello, ${req.session.username}. Welcome to your dashboard.`);
+    return res.send(
+      `Hello, ${req.session.username}. Welcome to your dashboard.`
+    );
   } else {
-    return res.status(401).send('Unauthorized. Please log in.');
+    return res.status(401).send("Unauthorized. Please log in.");
   }
 });
 
 // Route for logging out
-app.get('/logout', (req, res) => {
+app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      return res.status(500).send('Error logging out.');
+      return res.status(500).send("Error logging out.");
     }
-    res.clearCookie('connect.sid');
-    return res.send('Logged out successfully');
+    res.clearCookie("connect.sid");
+    return res.send("Logged out successfully");
   });
 });
 
@@ -59,4 +56,3 @@ app.get('/logout', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
